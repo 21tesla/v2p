@@ -3,6 +3,7 @@ from tqdm import tqdm
 import sys
 import sqlite3
 
+# Maps genomic position to Uniprot protein position where possible
 def main():
     data = pd.read_parquet(sys.argv[1], columns=['POS'])
     ids = pd.read_csv('lookup_ids.csv')

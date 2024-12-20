@@ -24,7 +24,7 @@ echo "Processing VEP output..."
 data_path=$(basename ${vep_out} .vcf).pq
 bash /home/myuser/work/scripts/split_vep_output.sh ${vep_out} $(basename ${vep_out} .vcf).tsv header.txt $ncores
 python /home/myuser/work/scripts/add_header.py $(basename ${vep_out} .vcf).tsv header.txt ${data_path}
-python /home/myuser/work/scripts/get_positions_info.py ${data_path} ${data_path} ${gene}
+python /home/myuser/work/scripts/get_positions_info.py ${data_path} ${data_path} ${g}
 rm ${vep_out} ${vep_out}.gz* header.txt 
 echo "Finished processing VEP output..."
 

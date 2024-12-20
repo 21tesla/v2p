@@ -5,6 +5,7 @@ from get_geneID_features import get_geneID_features
 from get_aa_features import get_aa_features
 from get_cadd_features import get_cadd_features
 
+# Retrieves variant features to be used for predictions
 def get_all(in_path, out_path, n_cores=1):
     proteinID_features = get_proteinID_features(in_path, n_cores)
     geneID_features = get_geneID_features()

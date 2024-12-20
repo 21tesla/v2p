@@ -95,6 +95,8 @@ def get_predictions(conn, variants):
     cursor.execute(query)
     return cursor.fetchall()
 
+# Selects precomputed predictions from the downloaded database based on the variant
+# Chromosome_Position_Ref_Alt ID
 for chrom in chroms:
 
     chrom_df = data.loc[data['#CHROM'] == chrom]

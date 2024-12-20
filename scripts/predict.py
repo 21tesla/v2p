@@ -52,6 +52,7 @@ def generate_train(X_train_columns, predictor):
     columns = [c for c in X_train_columns if c != 'SYMBOL'] + selected_features
     return columns
 
+# Load features selected for each model
 X_train_br = generate_train(X_train_cols, 'br')
 X_train_brsampling = generate_train(X_train_cols, 'brsampling')
 X_train_rakel = generate_train(X_train_cols, 'rakel')
@@ -71,9 +72,11 @@ def predict(payload):
     df = df.replace('', None)
     df = df.replace('-', None)
 
+    # Load selected features and preprocessor
     selected_features = joblib.load(PROJECT_DIR + '/selected_features/' + PREFIX + predictor + '_selected_features.joblib')
     preprocessor = joblib.load(PROJECT_DIR + '/preprocessors/' + PREFIX + predictor + '_preprocessor.joblib')
 
+    # Reorder the features to reflect the training order
     df_temp = df.merge(genedata[selected_features], on='SYMBOL', how='left')
     if predictor == 'br':
         df_temp = df_temp[X_train_br]
@@ -88,6 +91,7 @@ def predict(payload):
     elif predictor == 'lpsampling':
         df_temp = df_temp[X_train_lpsampling]
 
+    # Preprocess the data
     proc_data = preprocessor.transform(df_temp)
     model = joblib.load(paths[predictor])
     try:
@@ -101,8 +105,10 @@ def predict(payload):
     else:
         model.classifier.set_params(**{'n_jobs': 1})
 
+    # Generate predictions as probabilities
     pred = model.predict_proba(proc_data)
 
+    # Get the probabilities for the positive class
     if predictor in ['br', 'brsampling']:
         pred = np.array([yp[:, 1] for yp in pred]).T
     elif predictor in ['rakel', 'rakelsampling']:
@@ -118,6 +124,7 @@ for infile, outname in zip(infiles, outnames):
     except:
         continue
 
+    # Predict in batches of 100,000 variants. Adjust as needed 
     for batch in tqdm(parquet_file.iter_batches(batch_size=100000)):
         df = batch.to_pandas()
         df = df.rename(columns={'Grantham_x':'Grantham', 'bStatistic_x': 'bStatistic'})
@@ -126,6 +133,7 @@ for infile, outname in zip(infiles, outnames):
         with mp.pool.Pool(6) as p:
             all_pred = p.map(predict, zip(['br', 'brsampling', 'rakel', 'rakelsampling', 'lp', 'lpsampling'], itertools.repeat(df, 6)))
 
+        # Output probabilities are the average across constituent models
         out = pd.DataFrame(np.mean(all_pred, axis=0), columns=OUT_COLUMNS)
         crisp = []
         for out_i, (_, r) in enumerate(out.iterrows()):

@@ -1,6 +1,7 @@
 import pandas as pd
 import sys
 
+# Merge features from VEP with features from database
 vep_data = pd.read_parquet(sys.argv[1])
 additional_data = pd.read_parquet(sys.argv[2])
 out = vep_data.merge(additional_data, on='ID')

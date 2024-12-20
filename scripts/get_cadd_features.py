@@ -21,6 +21,7 @@ def backup_query(r, cursor):
     else:
         return rows
 
+# Retrieves variant features from CADD
 def get_cadd_features(path, threads=1):
     data = pd.read_parquet(path, columns=['ID', 'CHROM', 'POS', 'REF', 'ALT', 'Gene'])
     data.index = data['CHROM'].astype(str)

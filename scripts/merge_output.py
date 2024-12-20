@@ -1,6 +1,7 @@
 import pandas as pd
 import sys
 
+# Merge precomputed predictions with novel predictions
 precomputed = pd.read_csv(sys.argv[1])
 on_the_fly = pd.read_csv(sys.argv[2])
 on_the_fly = on_the_fly[precomputed.columns]
