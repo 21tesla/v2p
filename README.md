@@ -96,6 +96,14 @@ wget -O - https://v2p-data.s3.us-east-2.amazonaws.com/indel_predictions.tar.gz |
 mv */*db .
 ```
 
+# Testing installation
+You can test your installation without downloading the full database files (the vep.tar.gz and hpo.db.gz must be downloaded).
+```
+bash get_predictions.sh -i $(V2P_DIR)/test/test.vcf -o results.csv -a $(V2P_DIR)/test/
+python test/test.py results.csv
+```
+If the installation was successful, you will see "Generated predictions matched the expected predictions".
+
 # Running V2P
 
 The input to V2P is a VCF file containing the variants you wish to score in hg38 coordinates. 
