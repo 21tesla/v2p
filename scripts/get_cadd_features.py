@@ -29,6 +29,8 @@ def get_cadd_features(path, threads=1):
     chroms.extend(['Y', 'X'])
     out = []
     for chrom in chroms:
+        if chrom not in data.index:
+            continue
         conn = genomicsqlite.connect(
                 '/mnt/cadddb/cadd' + str(chrom) + '_compressed.db',
                 read_only=True,
@@ -41,8 +43,6 @@ def get_cadd_features(path, threads=1):
             cursor.execute('pragma synchronous = normal;')
             cursor.execute('pragma temp_store = memory;')
             cursor.execute('pragma mmap_size = 30000000000;')
-            if chrom not in data.index:
-                continue
             df = data.loc[[chrom]]
             for _, r in tqdm(df.iterrows(), total=df.shape[0]):
                 _ = cursor.execute(SELECT_QUERY%(r['CHROM'], r['POS'], r['REF'], r['ALT'], r['Gene']))
