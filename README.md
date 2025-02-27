@@ -99,10 +99,13 @@ mv */*db .
 # Testing installation
 You can test your installation without downloading the full database files (the vep.tar.gz and hpo.db.gz must be downloaded).
 ```
-bash get_predictions.sh -i $(V2P_DIR)/test/test.vcf -o results.csv -a $(V2P_DIR)/test/
+cp ${V2P_DIR}/test/test.vcf ${V2P_DIR}/test.vcf
+bash get_predictions.sh -i test.vcf -o results.csv -a ${V2P_DIR}/test/
 python test/test.py results.csv
 ```
-If the installation was successful, you will see "Generated predictions matched the expected predictions".
+If the installation was successful, you will see "Generated predictions matched the expected predictions". 
+(Runtime on CentOS 7.9.2009, 1 core: ~30s)
+(Tested on CentOS 7.9.2009, Ubuntu 18.04, OSx)
 
 # Running V2P
 
