@@ -2,15 +2,10 @@ import pandas as pd
 import pyarrow.parquet as pq
 import numpy as np
 from tqdm import tqdm
-import multiprocessing as mp
-from glob import glob
-import sys
 import os
-import itertools
 import joblib
+import argparse
 
-PREFIX = 'full_'
-POSTFIX = '_full'
 PROJECT_DIR = os.environ['V2P_DIR']
 OUT_COLUMNS = ['HP:0033127','HP:0040064','HP:0000707','HP:0001939','HP:0000152','HP:0001626','HP:0000119','HP:0000478',
                 'HP:0002715','HP:0001574','HP:0001871','HP:0025031','HP:0002664','HP:0002086','HP:0000818','HP:0000598',
@@ -43,57 +38,21 @@ NAMES = {'HP:0033127': 'Musculoskeletal',
  'HP:0045027': 'Thoracic cavity',
  'Pathogenic': 'Pathogenic'}
 
-# Load additional annotations and training data
-X_train_cols = pd.read_csv(PROJECT_DIR + '/data/train_columns.csv', header=None)[0].tolist()
-genedata = pd.read_parquet(PROJECT_DIR + '/data/gene_data.pq')
-
-def generate_train(X_train_columns, predictor):
-    selected_features = joblib.load(PROJECT_DIR + '/selected_features/' + PREFIX + predictor + '_selected_features.joblib')
-    columns = [c for c in X_train_columns if c != 'SYMBOL'] + selected_features
-    return columns
-
-# Load features selected for each model
-X_train_br = generate_train(X_train_cols, 'br')
-X_train_brsampling = generate_train(X_train_cols, 'brsampling')
-X_train_rakel = generate_train(X_train_cols, 'rakel')
-X_train_rakelsampling = generate_train(X_train_cols, 'rakelsampling')
-X_train_lp = generate_train(X_train_cols, 'lp')
-X_train_lpsampling = generate_train(X_train_cols, 'lpsampling')
-
-paths = {'br': PROJECT_DIR + '/models/' + PREFIX + 'binaryrelevance.joblib',
-         'brsampling': PROJECT_DIR + '/models/' + PREFIX + 'binaryrelevance_sampling.joblib',
-         'rakel': PROJECT_DIR + '/models/' + PREFIX + 'rakeld.joblib',
-         'rakelsampling': PROJECT_DIR + '/models/' + PREFIX + 'rakeld_sampling.joblib',
-         'lp': PROJECT_DIR + '/models/' + PREFIX + 'labelpowerset.joblib',
-         'lpsampling': PROJECT_DIR + '/models/' + PREFIX + 'labelpowerset_sampling.joblib'}
-
-def predict(payload):
-    predictor, df = payload
+def predict_single(predictor, df, models, preprocessors, selected_features, x_train_columns, genedata):
     df = df.replace('', None)
     df = df.replace('-', None)
 
-    # Load selected features and preprocessor
-    selected_features = joblib.load(PROJECT_DIR + '/selected_features/' + PREFIX + predictor + '_selected_features.joblib')
-    preprocessor = joblib.load(PROJECT_DIR + '/preprocessors/' + PREFIX + predictor + '_preprocessor.joblib')
+    # Use pre-loaded preprocessor
+    preprocessor = preprocessors[predictor]
 
     # Reorder the features to reflect the training order
     df_temp = df.merge(genedata[selected_features], on='SYMBOL', how='left')
-    if predictor == 'br':
-        df_temp = df_temp[X_train_br]
-    elif predictor == 'brsampling':
-        df_temp = df_temp[X_train_brsampling]
-    elif predictor == 'rakel':
-        df_temp = df_temp[X_train_rakel]
-    elif predictor == 'rakelsampling':
-        df_temp = df_temp[X_train_rakelsampling]
-    elif predictor == 'lp':
-        df_temp = df_temp[X_train_lp]
-    elif predictor == 'lpsampling':
-        df_temp = df_temp[X_train_lpsampling]
+    df_temp = df_temp[x_train_columns[predictor]]
 
     # Preprocess the data
     proc_data = preprocessor.transform(df_temp)
-    model = joblib.load(paths[predictor])
+    model = models[predictor]
+    
     try:
         model.set_params(**{'n_jobs': 1})
     except:
@@ -115,36 +74,94 @@ def predict(payload):
         pred = pred.toarray()
     return pred
 
-infiles = sys.argv[1:]
-outnames = [f.replace('.pq', '_preds.csv') for f in infiles]
+def main():
+    parser = argparse.ArgumentParser(description='Predict variant impact using trained models')
+    parser.add_argument('prefix', type=str, help='Prefix for model files (e.g., "full_")')
+    parser.add_argument('files', nargs='+', help='Space-separated list of input parquet files')
+    
+    args = parser.parse_args()
+    
+    PREFIX = args.prefix
+    infiles = args.files
+    outnames = [f.replace('.pq', '_preds.csv') for f in infiles]
 
-for infile, outname in zip(infiles, outnames):
-    try:
-        parquet_file = pq.ParquetFile(infile)
-    except:
-        continue
+    X_train_cols = pd.read_csv(PROJECT_DIR + '/data/train_columns.csv', header=None)[0].tolist()
+    if PREFIX == 'novep_':
+        vep_drop = ['MaxEntScan_alt', 'MaxEntScan_diff', 'MaxEntScan_ref', 'ada_score', 'rf_score', 'Eigen_PC_raw_coding', 'Eigen_raw_coding', 'GERPplus_plus_NR', 'GERPplus_plus_RS', 'GM12878_confidence_value', 'GM12878_fitCons_score', 'GenoCanyon_score', 'H1_hESC_confidence_value', 'H1_hESC_fitCons_score', 'HUVEC_confidence_value', 'HUVEC_fitCons_score', 'LINSIGHT', 'LIST_S2_score', 'LRT_Omega', 'LRT_score', 'MPC_score', 'MutationAssessor_score', 'SiPhy_29way_logOdds', 'integrated_confidence_value', 'integrated_fitCons_score', 'GDI', 'MSC_95CI', 'RVIS', 'Indispensability_score', 'A3D_SCORE', 'concavity_score', 'S_DDG[SEQ]', 'S_DDG[3D]', 's_het', 'targetScan', 'mirSVR-Score', 'mirSVR-E', 'mirSVR-Aln', 'GerpRS', 'GerpRSpval', 'GerpN', 'GerpS', 'SpliceAI-acc-gain', 'SpliceAI-acc-loss', 'SpliceAI-don-gain', 'SpliceAI-don-loss', 'MMSp_acceptorIntron', 'MMSp_acceptor', 'MMSp_exon', 'MMSp_donor', 'MMSp_donorIntron', 'dbscSNV-ada_score', 'dbscSNV-rf_score']
+        X_train_cols = [c for c in X_train_cols if c not in vep_drop]
+    genedata = pd.read_parquet(PROJECT_DIR + '/data/gene_data.pq')
 
-    # Predict in batches of 100,000 variants. Adjust as needed 
-    for batch in tqdm(parquet_file.iter_batches(batch_size=100000)):
-        df = batch.to_pandas()
-        df = df.rename(columns={'Grantham_x':'Grantham', 'bStatistic_x': 'bStatistic'})
-        df = df.reset_index(drop=True)
+    def generate_train(X_train_columns, predictor):
+        selected_features = joblib.load(PROJECT_DIR + '/selected_features/' + PREFIX + predictor + '_selected_features.joblib')
+        columns = [c for c in X_train_columns if c != 'SYMBOL'] + selected_features
+        return columns
 
-        with mp.pool.Pool(6) as p:
-            all_pred = p.map(predict, zip(['br', 'brsampling', 'rakel', 'rakelsampling', 'lp', 'lpsampling'], itertools.repeat(df, 6)))
+    # Load features selected for each model
+    X_train_br = generate_train(X_train_cols, 'br')
+    X_train_brsampling = generate_train(X_train_cols, 'brsampling')
+    X_train_rakel = generate_train(X_train_cols, 'rakel')
+    X_train_rakelsampling = generate_train(X_train_cols, 'rakelsampling')
+    X_train_lp = generate_train(X_train_cols, 'lp')
+    X_train_lpsampling = generate_train(X_train_cols, 'lpsampling')
 
-        # Output probabilities are the average across constituent models
-        out = pd.DataFrame(np.mean(all_pred, axis=0), columns=OUT_COLUMNS)
-        crisp = []
-        for out_i, (_, r) in enumerate(out.iterrows()):
-            rc = [NAMES[l] for p, l in zip(r, out.columns) if p >= CUTOFFS[l]]
-            if not rc:
-                rc = ['Benign']
-            crisp.append(','.join(rc))
-        out['V2P_predicted_phenotypes'] = crisp
-        out['ID'] = df['ID']
-        out.columns = [NAMES[c] if c in NAMES.keys() else c for c in out.columns]
-        if os.path.exists(outname):
-            out.to_csv(outname, index=None, mode='a', header=None)
-        else:
-            out.to_csv(outname, index=None)
+    x_train_columns = {
+        'br': X_train_br,
+        'brsampling': X_train_brsampling,
+        'rakel': X_train_rakel,
+        'rakelsampling': X_train_rakelsampling,
+        'lp': X_train_lp,
+        'lpsampling': X_train_lpsampling
+    }
+
+    paths = {'br': PROJECT_DIR + '/models/' + PREFIX + 'binaryrelevance.joblib',
+            'brsampling': PROJECT_DIR + '/models/' + PREFIX + 'binaryrelevance_sampling.joblib',
+            'rakel': PROJECT_DIR + '/models/' + PREFIX + 'rakeld.joblib',
+            'rakelsampling': PROJECT_DIR + '/models/' + PREFIX + 'rakeld_sampling.joblib',
+            'lp': PROJECT_DIR + '/models/' + PREFIX + 'labelpowerset.joblib',
+            'lpsampling': PROJECT_DIR + '/models/' + PREFIX + 'labelpowerset_sampling.joblib'}
+
+
+    models = {}
+    preprocessors = {}
+    for predictor in ['br', 'brsampling', 'rakel', 'rakelsampling', 'lp', 'lpsampling']:
+        models[predictor] = joblib.load(paths[predictor])
+        preprocessors[predictor] = joblib.load(PROJECT_DIR + '/preprocessors/' + PREFIX + predictor + '_preprocessor.joblib')
+
+
+    for infile, outname in zip(infiles, outnames):
+        try:
+            parquet_file = pq.ParquetFile(infile)
+        except:
+            continue
+
+        # Predict in batches of 100,000 variants. Adjust as needed 
+        for batch in tqdm(parquet_file.iter_batches(batch_size=100000)):
+            df = batch.to_pandas()
+            df = df.rename(columns={'Grantham_x':'Grantham', 'bStatistic_x': 'bStatistic'})
+            df = df.reset_index(drop=True)
+
+            # Process sequentially with pre-loaded models
+            all_pred = []
+            for predictor in ['br', 'brsampling', 'rakel', 'rakelsampling', 'lp', 'lpsampling']:
+                selected_features = joblib.load(PROJECT_DIR + '/selected_features/' + PREFIX + predictor + '_selected_features.joblib')
+                pred = predict_single(predictor, df, models, preprocessors, selected_features, x_train_columns, genedata)
+                all_pred.append(pred)
+
+            # Output probabilities are the average across constituent models
+            out = pd.DataFrame(np.mean(all_pred, axis=0), columns=OUT_COLUMNS)
+            crisp = []
+            for out_i, (_, r) in enumerate(out.iterrows()):
+                rc = [NAMES[l] for p, l in zip(r, out.columns) if p >= CUTOFFS[l]]
+                if not rc:
+                    rc = ['Benign']
+                crisp.append(','.join(rc))
+            out['V2P_predicted_phenotypes'] = crisp
+            out['ID'] = df['ID']
+            out.columns = [NAMES[c] if c in NAMES.keys() else c for c in out.columns]
+            if os.path.exists(outname):
+                out.to_csv(outname, index=None, mode='a', header=None)
+            else:
+                out.to_csv(outname, index=None)
+
+if __name__ == "__main__":
+    main()

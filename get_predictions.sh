@@ -9,6 +9,7 @@ usage() {
           -c cpu              number of CPUs (optional)
           -g [gene]           annotate specific gene (optional)
           -s singularity      use singularity instead of docker (optional)
+          -n no_veps          V2P without variant effect predictor features (optional)
           -h help             print this message and exit"
 }
 
@@ -19,8 +20,9 @@ g=""
 precomputed_path=""
 annotation_path=""
 s=""
+n=""
 
-while getopts ":i:o:c::g::p::a:sh" opt; do
+while getopts ":i:o:c::g::p::a:shn" opt; do
     case ${opt} in
         i )
             input_path=$OPTARG
@@ -42,6 +44,9 @@ while getopts ":i:o:c::g::p::a:sh" opt; do
             ;;
         s )
             s="true"
+            ;;
+        n )
+            n="true"
             ;;
         h )
             usage
@@ -88,7 +93,11 @@ if [ -f  ${input_path} ] && [ $(wc -l < ${input_path}) -ge 2 ]; then
         docker run --rm -v $(pwd):/home/myuser/work --user $(id -u):$(id -g) -v ${annotation_path}:/mnt/cadddb dstein96/v2p $input_path $(basename $input_path .vcf)_annotations.pq $c $g
     fi
     echo "Predicting novel variant impact..."
-    python ${V2P_DIR}/scripts/predict.py $(basename $input_path .vcf)_annotations.pq
+    if [ "$n" = "true" ]; then
+        python ${V2P_DIR}/scripts/predict.py novep_  $(basename $input_path .vcf)_annotations.pq 
+    else
+        python ${V2P_DIR}/scripts/predict.py full_  $(basename $input_path .vcf)_annotations.pq 
+    fi
 fi
 
 if [ ${precomputed_path} ] && [ -f "$(basename $input_path .vcf)_annotations_preds.csv" ]; then

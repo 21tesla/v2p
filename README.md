@@ -126,3 +126,13 @@ with singularity instead of docker
 ```
 bash get_predictions.sh -i /path/to/input -o /path/to/output -a /absolute/path/to/annotations -p /path/to/precomputed_predictions -c 5 -s
 ```
+
+# Alternate models
+
+We also provide a version of V2P trained without other variant effect predictor outputs as features. 
+You can run this version of the model using the -n flag. 
+
+Example
+```
+bash get_predictions.sh -i /path/to/input -o /path/to/output -a /absolute/path/to/annotations -p /path/to/precomputed_predictions -c 5 -n
+```
