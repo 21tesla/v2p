@@ -1,0 +1,12 @@
+models/novep_binaryrelevance.joblib filter=lfs diff=lfs merge=lfs -text
+models/novep_binaryrelevance_sampling.joblib filter=lfs diff=lfs merge=lfs -text
+models/novep_labelpowerset_sampling.joblib filter=lfs diff=lfs merge=lfs -text
+models/full_binaryrelevance_sampling.joblib filter=lfs diff=lfs merge=lfs -text
+models/full_labelpowerset_sampling.joblib filter=lfs diff=lfs merge=lfs -text
+models/full_rakeld.joblib filter=lfs diff=lfs merge=lfs -text
+models/full_rakeld_sampling.joblib filter=lfs diff=lfs merge=lfs -text
+models/novep_rakeld_sampling.joblib filter=lfs diff=lfs merge=lfs -text
+models/full_binaryrelevance.joblib filter=lfs diff=lfs merge=lfs -text
+models/full_labelpowerset.joblib filter=lfs diff=lfs merge=lfs -text
+models/novep_labelpowerset.joblib filter=lfs diff=lfs merge=lfs -text
+models/novep_rakeld.joblib filter=lfs diff=lfs merge=lfs -text
