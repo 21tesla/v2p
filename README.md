@@ -4,6 +4,9 @@ higher throughput, offline installation may be a better option.
 
 # Installing V2P
 
+## Install git-lfs
+https://git-lfs.com/
+
 ## Download the V2P repository
 
 ```
