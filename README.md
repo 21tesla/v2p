@@ -24,7 +24,11 @@ echo "export V2P_DIR=/path/to/dir" >> ~/.bashrc
 ## Install dependencies
 
 V2P's dependencies may be installed with conda. 
-```conda env create --file v2p.yaml```
+```
+conda env create --file v2p.yaml
+```
+**Note: Some users report issues creating the conda environment. In some cases replacing the defaults channel with nodefault may fix this.
+
 Activate the conda environment.
 ```conda activate v2p```
 An additional python dependency must be installed after creating the conda environment.
