@@ -8,34 +8,32 @@ PROJECT_DIR = os.environ['V2P_DIR']
 DATABASE_LOCATION = sys.argv[3]
 NUCS = ['A','T','G','C', 'a', 't', 'g', 'c']
 
-CUTOFFS = {'HP:0033127': 0.13375073118275554, 'HP:0040064': 0.1027121652336587, 'HP:0000707': 0.1280226940316797, 'HP:0001939': 0.13289699594521331, 'HP:0000152': 0.10556380274414325, 'HP:0001626': 0.1553588637596261, 'HP:0000119': 0.1332160134368378, 'HP:0000478': 0.20826082412161753, 'HP:0002715': 0.15873701583024458, 'HP:0001574': 0.16293394524364474, 'HP:0001871': 0.13980646528040241, 'HP:0025031': 0.1296962674378072, 'HP:0002664': 0.10575180529819386, 'HP:0002086': 0.02704949652042875, 'HP:0000818': 0.12326556052836206, 'HP:0000598': 0.12354089044413866, 'HP:0025354': 0.23111810436978011, 'HP:0001197': 0.0020001575650973, 'HP:0001507': 0.21537008781720823, 'HP:0025142': 0.0988696186665396, 'HP:0000769': 0.13120347198135124, 'HP:0001608': 0.0003191991199752, 'HP:0045027': 2.231477614568821e-03, 'Pathogenic': 0.454434532586802}
+CUTOFFS = {'HP:0033127': 0.1567193267520465,
+ 'HP:0040064': 0.1462383623540305,
+ 'HP:0000707': 0.218444388264641,
+ 'HP:0001939': 0.1343807652765258,
+ 'HP:0000152': 0.2044814790155267,
+ 'HP:0001626': 0.1778303343086918,
+ 'HP:0000119': 0.1660729258282984,
+ 'HP:0000478': 0.3116954769244471,
+ 'HP:0002715': 0.1708217552071461,
+ 'HP:0001574': 0.1733027692065684,
+ 'HP:0001871': 0.1351526870849739,
+ 'HP:0025031': 0.1604417003743339,
+ 'HP:0002664': 0.2689097200492832,
+ 'HP:0002086': 0.0989268196827497,
+ 'HP:0000818': 0.0525938291132373,
+ 'HP:0000598': 0.2912918120493089,
+ 'HP:0025354': 0.0876004261284816,
+ 'HP:0001197': 0.0030211178500946,
+ 'HP:0001507': 0.0330074809050576,
+ 'HP:0025142': 0.0398178148872888,
+ 'HP:0000769': 0.133028045951846,
+ 'HP:0001608': 0.003593885070548,
+ 'HP:0045027': 0.1,
+ 'Pathogenic': 0.3985216152439556}
 
-NAMES = {'musculoskeletal': 'Musculoskeletal',
- 'limbs': 'Limbs',
- 'nervous': 'Nervous',
- 'metabolism': 'Metabolism/homeostasis',
- 'head': 'Head/neck',
- 'cardiovascular': 'Cardiovascular',
- 'genitourinary': 'Genitourinary',
- 'eye': 'Eye',
- 'immune': 'Immune',
- 'integument': 'Integument',
- 'blood': 'Blood/blood-forming tissues',
- 'digestive': 'Digestive',
- 'neoplasm': 'Neoplasm',
- 'respiratory': 'Respiratory',
- 'endocrine': 'Endocrine',
- 'ear': 'Ear',
- 'cellular': 'Cellular',
- 'prenatal': 'Prenatal development/birth',
- 'growth': 'Growth',
- 'constitutional': 'Constitutional',
- 'breast': 'Breast',
- 'voice': 'Voice',
- 'thoracic': 'Thoracic cavity',
- 'Pathogenic': 'Pathogenic',
- 'uid': 'ID'}
-
+ 
 NAMES_HPO = {'Musculoskeletal': 'HP:0033127',
  'Limbs': 'HP:0040064',
  'Nervous': 'HP:0000707',
@@ -61,13 +59,12 @@ NAMES_HPO = {'Musculoskeletal': 'HP:0033127',
  'Thoracic cavity': 'HP:0045027',
  'Pathogenic': 'Pathogenic'}
 
-ORDER = ['musculoskeletal', 'limbs', 'nervous', 'metabolism', 'head', 'cardiovascular', 'genitourinary', 'eye',
-         'immune', 'integument', 'blood', 'digestive', 'neoplasm', 'respiratory', 'endocrine', 'ear', 'cellular',
-         'prenatal', 'growth', 'constitutional', 'breast', 'voice', 'thoracic', 'Pathogenic', 'uid']
-OUT_ORDER = ['ID','V2P_predicted_phenotypes','Musculoskeletal','Limbs','Nervous','Metabolism/homeostasis','Head/neck','Cardiovascular','Genitourinary',
-             'Eye','Immune','Integument','Blood/blood-forming tissues','Digestive','Neoplasm','Respiratory','Endocrine',
-             'Ear','Cellular','Prenatal development/birth','Growth','Constitutional','Breast','Voice','Thoracic cavity',
-             'Pathogenic']
+ORDER = ['ID', 'Musculoskeletal', 'Limbs', 'Nervous', 'Metabolism/homeostasis', 'Head/neck', 'Cardiovascular', 'Genitourinary', 'Eye',
+    'Immune', 'Integument', 'Blood/blood-forming tissues', 'Digestive', 'Neoplasm', 'Respiratory', 'Endocrine', 'Ear', 'Cellular',
+    'Prenatal development/birth', 'Growth', 'Constitutional', 'Breast', 'Voice','Thoracic cavity', 'Pathogenic']
+OUT_ORDER = ['ID','V2P_predicted_phenotypes', 'Musculoskeletal', 'Limbs', 'Nervous', 'Metabolism/homeostasis', 'Head/neck', 'Cardiovascular', 'Genitourinary', 'Eye',
+    'Immune', 'Integument', 'Blood/blood-forming tissues', 'Digestive', 'Neoplasm', 'Respiratory', 'Endocrine', 'Ear', 'Cellular',
+    'Prenatal development/birth', 'Growth', 'Constitutional', 'Breast', 'Voice','Thoracic cavity', 'Pathogenic']
 
 data = pd.read_csv(sys.argv[1], sep='\t', low_memory=False)
 data['#CHROM'] = data['#CHROM'].apply(lambda v: str(v).replace('chr',''))
@@ -87,10 +84,11 @@ def get_crisp(df):
 
 def get_predictions(conn, variants):
     cursor = conn.cursor()
+    escaped_columns = ','.join([f'"{col}"' for col in ORDER])
     query = f'''
-    SELECT {','.join(ORDER)} 
-    FROM predictions 
-    WHERE uid IN {repr(tuple(map(str, variants['ID'].tolist() + [''])))}
+    SELECT {escaped_columns}
+    FROM predictions
+    WHERE ID IN {repr(tuple(map(str, variants['ID'].tolist() + [''])))}
     '''
     cursor.execute(query)
     return cursor.fetchall()
@@ -113,12 +111,12 @@ for chrom in chroms:
         read_only=True,
     )
 
-    snp_rows = pd.DataFrame(columns=[NAMES[c] for c in ORDER])
-    indel_rows = pd.DataFrame(columns=[NAMES[c] for c in ORDER])
+    snp_rows = pd.DataFrame(columns=ORDER)
+    indel_rows = pd.DataFrame(columns=ORDER)
     if not snps.empty:
-        snp_rows = pd.DataFrame(get_predictions(snp_dbconn, snps), columns=[NAMES[c] for c in ORDER])
+        snp_rows = pd.DataFrame(get_predictions(snp_dbconn, snps), columns=ORDER)
     if not indels.empty:
-        indel_rows = pd.DataFrame(get_predictions(indel_dbconn, indels), columns=[NAMES[c] for c in ORDER])
+        indel_rows = pd.DataFrame(get_predictions(indel_dbconn, indels), columns=ORDER)
 
     snp_rows['V2P_predicted_phenotypes'] = get_crisp(snp_rows)
     indel_rows['V2P_predicted_phenotypes'] = get_crisp(indel_rows)
