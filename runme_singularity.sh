@@ -10,7 +10,7 @@ cd /home/logan/software/v2p
 #    -s: TELLS THE SCRIPT TO USE SINGULARITY
 
 bash get_predictions.sh \
-  -i "sample1.deepvariant.prune.vcf" \
+  -i "pgpc4-clean.vcf" \
   -o "output2" \
   -c 8 \
   -a "$(pwd)/cadd_data/" \
