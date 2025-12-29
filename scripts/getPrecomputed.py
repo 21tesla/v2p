@@ -4,72 +4,31 @@ import sys
 import pandas as pd
 import os
 
+print("--- DEBUG: Starting getPrecomputed.py ---")
+
 PROJECT_DIR = os.environ['V2P_DIR']
 DATABASE_LOCATION = sys.argv[3]
 NUCS = ['A','T','G','C', 'a', 't', 'g', 'c']
 
-CUTOFFS = {'HP:0033127': 0.1567193267520465,
- 'HP:0040064': 0.1462383623540305,
- 'HP:0000707': 0.218444388264641,
- 'HP:0001939': 0.1343807652765258,
- 'HP:0000152': 0.2044814790155267,
- 'HP:0001626': 0.1778303343086918,
- 'HP:0000119': 0.1660729258282984,
- 'HP:0000478': 0.3116954769244471,
- 'HP:0002715': 0.1708217552071461,
- 'HP:0001574': 0.1733027692065684,
- 'HP:0001871': 0.1351526870849739,
- 'HP:0025031': 0.1604417003743339,
- 'HP:0002664': 0.2689097200492832,
- 'HP:0002086': 0.0989268196827497,
- 'HP:0000818': 0.0525938291132373,
- 'HP:0000598': 0.2912918120493089,
- 'HP:0025354': 0.0876004261284816,
- 'HP:0001197': 0.0030211178500946,
- 'HP:0001507': 0.0330074809050576,
- 'HP:0025142': 0.0398178148872888,
- 'HP:0000769': 0.133028045951846,
- 'HP:0001608': 0.003593885070548,
- 'HP:0045027': 0.1,
- 'Pathogenic': 0.3985216152439556}
+# ... [CUTOFFS and NAMES_HPO dictionaries omitted for brevity - keep them as they were] ...
+# (Paste the original CUTOFFS, NAMES_HPO, ORDER, and OUT_ORDER lists here)
+# For simplicity, I am assuming you keep the dictionaries defined in your original file.
+# If you copy-paste this, ensure you include those dictionaries or the script will fail later.
 
- 
-NAMES_HPO = {'Musculoskeletal': 'HP:0033127',
- 'Limbs': 'HP:0040064',
- 'Nervous': 'HP:0000707',
- 'Metabolism/homeostasis': 'HP:0001939',
- 'Head/neck': 'HP:0000152',
- 'Cardiovascular': 'HP:0001626',
- 'Genitourinary': 'HP:0000119',
- 'Eye': 'HP:0000478',
- 'Immune': 'HP:0002715',
- 'Integument': 'HP:0001574',
- 'Blood/blood-forming tissues': 'HP:0001871',
- 'Digestive': 'HP:0025031',
- 'Neoplasm': 'HP:0002664',
- 'Respiratory': 'HP:0002086',
- 'Endocrine': 'HP:0000818',
- 'Ear': 'HP:0000598',
- 'Cellular': 'HP:0025354',
- 'Prenatal development/birth': 'HP:0001197',
- 'Growth': 'HP:0001507',
- 'Constitutional': 'HP:0025142',
- 'Breast': 'HP:0000769',
- 'Voice': 'HP:0001608',
- 'Thoracic cavity': 'HP:0045027',
- 'Pathogenic': 'Pathogenic'}
+CUTOFFS = {'HP:0033127': 0.1567193267520465, 'HP:0040064': 0.1462383623540305, 'HP:0000707': 0.218444388264641, 'HP:0001939': 0.1343807652765258, 'HP:0000152': 0.2044814790155267, 'HP:0001626': 0.1778303343086918, 'HP:0000119': 0.1660729258282984, 'HP:0000478': 0.3116954769244471, 'HP:0002715': 0.1708217552071461, 'HP:0001574': 0.1733027692065684, 'HP:0001871': 0.1351526870849739, 'HP:0025031': 0.1604417003743339, 'HP:0002664': 0.2689097200492832, 'HP:0002086': 0.0989268196827497, 'HP:0000818': 0.0525938291132373, 'HP:0000598': 0.2912918120493089, 'HP:0025354': 0.0876004261284816, 'HP:0001197': 0.0030211178500946, 'HP:0001507': 0.0330074809050576, 'HP:0025142': 0.0398178148872888, 'HP:0000769': 0.133028045951846, 'HP:0001608': 0.003593885070548, 'HP:0045027': 0.1, 'Pathogenic': 0.3985216152439556}
+NAMES_HPO = {'Musculoskeletal': 'HP:0033127', 'Limbs': 'HP:0040064', 'Nervous': 'HP:0000707', 'Metabolism/homeostasis': 'HP:0001939', 'Head/neck': 'HP:0000152', 'Cardiovascular': 'HP:0001626', 'Genitourinary': 'HP:0000119', 'Eye': 'HP:0000478', 'Immune': 'HP:0002715', 'Integument': 'HP:0001574', 'Blood/blood-forming tissues': 'HP:0001871', 'Digestive': 'HP:0025031', 'Neoplasm': 'HP:0002664', 'Respiratory': 'HP:0002086', 'Endocrine': 'HP:0000818', 'Ear': 'HP:0000598', 'Cellular': 'HP:0025354', 'Prenatal development/birth': 'HP:0001197', 'Growth': 'HP:0001507', 'Constitutional': 'HP:0025142', 'Breast': 'HP:0000769', 'Voice': 'HP:0001608', 'Thoracic cavity': 'HP:0045027', 'Pathogenic': 'Pathogenic'}
+ORDER = ['ID', 'Musculoskeletal', 'Limbs', 'Nervous', 'Metabolism/homeostasis', 'Head/neck', 'Cardiovascular', 'Genitourinary', 'Eye', 'Immune', 'Integument', 'Blood/blood-forming tissues', 'Digestive', 'Neoplasm', 'Respiratory', 'Endocrine', 'Ear', 'Cellular', 'Prenatal development/birth', 'Growth', 'Constitutional', 'Breast', 'Voice','Thoracic cavity', 'Pathogenic']
+OUT_ORDER = ['ID','V2P_predicted_phenotypes', 'Musculoskeletal', 'Limbs', 'Nervous', 'Metabolism/homeostasis', 'Head/neck', 'Cardiovascular', 'Genitourinary', 'Eye', 'Immune', 'Integument', 'Blood/blood-forming tissues', 'Digestive', 'Neoplasm', 'Respiratory', 'Endocrine', 'Ear', 'Cellular', 'Prenatal development/birth', 'Growth', 'Constitutional', 'Breast', 'Voice','Thoracic cavity', 'Pathogenic']
 
-ORDER = ['ID', 'Musculoskeletal', 'Limbs', 'Nervous', 'Metabolism/homeostasis', 'Head/neck', 'Cardiovascular', 'Genitourinary', 'Eye',
-    'Immune', 'Integument', 'Blood/blood-forming tissues', 'Digestive', 'Neoplasm', 'Respiratory', 'Endocrine', 'Ear', 'Cellular',
-    'Prenatal development/birth', 'Growth', 'Constitutional', 'Breast', 'Voice','Thoracic cavity', 'Pathogenic']
-OUT_ORDER = ['ID','V2P_predicted_phenotypes', 'Musculoskeletal', 'Limbs', 'Nervous', 'Metabolism/homeostasis', 'Head/neck', 'Cardiovascular', 'Genitourinary', 'Eye',
-    'Immune', 'Integument', 'Blood/blood-forming tissues', 'Digestive', 'Neoplasm', 'Respiratory', 'Endocrine', 'Ear', 'Cellular',
-    'Prenatal development/birth', 'Growth', 'Constitutional', 'Breast', 'Voice','Thoracic cavity', 'Pathogenic']
-
+print(f"--- DEBUG: Loading VCF from: {sys.argv[1]}")
 data = pd.read_csv(sys.argv[1], sep='\t', low_memory=False)
+
+# Strip 'chr' prefix
 data['#CHROM'] = data['#CHROM'].apply(lambda v: str(v).replace('chr',''))
 data['ID'] = data.apply(lambda r: '_'.join([str(r['#CHROM']), str(int(r['POS'])),r['REF'], r['ALT']]), axis=1) 
+
 chroms = list(data['#CHROM'].unique())
+print(f"--- DEBUG: Found the following chromosomes in VCF: {chroms}")
 
 tmpfile = sys.argv[2]
 
@@ -93,26 +52,46 @@ def get_predictions(conn, variants):
     cursor.execute(query)
     return cursor.fetchall()
 
-# Selects precomputed predictions from the downloaded database based on the variant
-# Chromosome_Position_Ref_Alt ID
 for chrom in chroms:
-
+    print(f"--- DEBUG: Processing Chromosome: {chrom}")
+    
     chrom_df = data.loc[data['#CHROM'] == chrom]
     snps = chrom_df.loc[((chrom_df['REF'].isin(NUCS)) & (chrom_df['ALT'].isin(NUCS)))]
     indels = chrom_df.loc[~chrom_df['ID'].isin(snps['ID'])]
     
-    snp_dbconn = genomicsqlite.connect(
-        DATABASE_LOCATION + '/chrom' + str(chrom) + '_compressed.db',
-        read_only=True,
-    )
+    # Construct paths
+    snp_db_path = f"{DATABASE_LOCATION}/chrom{chrom}_compressed.db"
+    indel_db_path = f"{DATABASE_LOCATION}/gnomad_chrom{chrom}_compressed.db"
 
-    indel_dbconn = genomicsqlite.connect(
-        DATABASE_LOCATION + '/gnomad_chrom' + str(chrom) + '_compressed.db',
-        read_only=True,
-    )
+    # Try connecting to SNP DB
+    print(f"--- DEBUG: Attempting to open SNP DB: {snp_db_path}")
+    if not os.path.exists(snp_db_path):
+        print(f"!!! CRITICAL ERROR: File not found: {snp_db_path}")
+        print("!!! Skipping this chromosome to prevent crash.")
+        continue
+
+    try:
+        snp_dbconn = genomicsqlite.connect(snp_db_path, read_only=True)
+    except Exception as e:
+        print(f"!!! SQLITE ERROR opening {snp_db_path}: {e}")
+        raise e
+
+    # Try connecting to Indel DB
+    print(f"--- DEBUG: Attempting to open INDEL DB: {indel_db_path}")
+    if not os.path.exists(indel_db_path):
+        print(f"!!! CRITICAL ERROR: File not found: {indel_db_path}")
+        print("!!! Skipping this chromosome to prevent crash.")
+        continue
+
+    try:
+        indel_dbconn = genomicsqlite.connect(indel_db_path, read_only=True)
+    except Exception as e:
+        print(f"!!! SQLITE ERROR opening {indel_db_path}: {e}")
+        raise e
 
     snp_rows = pd.DataFrame(columns=ORDER)
     indel_rows = pd.DataFrame(columns=ORDER)
+    
     if not snps.empty:
         snp_rows = pd.DataFrame(get_predictions(snp_dbconn, snps), columns=ORDER)
     if not indels.empty:
@@ -131,3 +110,4 @@ found = pd.read_csv(tmpfile, usecols=['ID'])
 data = data.loc[~data['ID'].isin(found['ID'])]
 outname = sys.argv[1].split('/')[-1].replace('.vcf', '_novel.vcf')
 data.to_csv(outname, index=None, sep='\t')
+print("--- DEBUG: Finished getPrecomputed.py successfully ---")
