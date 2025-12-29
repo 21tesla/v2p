@@ -5,10 +5,10 @@ cd /home/logan/software/v2p
 
 # 2. Run with Precomputed variants (-p)
 #    -p: Must be a path valid on YOUR machine (Host). 
-#        $(pwd)/predictions/ expands to /home/logan/software/v2p/predictions/
+#        $(pwd)/predictions/ expanded to /home/logan/software/v2p/predictions/ in my case
 
 bash get_predictions.sh \
-  -i "sample_full.vcf" \
+  -i "pgpc4-clean.vcf" \
   -o "output1" \
   -c 16 \
   -a "$(pwd)/cadd_data/" \
