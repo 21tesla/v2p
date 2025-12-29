@@ -6,17 +6,21 @@ ALLOWED_CHROMS = set([str(i) for i in range(1, 23)] + ['X', 'Y'])
 
 def process_vcf(file_path):
     """
-    Reads a VCF (plain text or .gz), filters for allowed chromosomes (1-22, X, Y),
-    strips prefixes, and outputs valid VCF lines to stdout.
+    Reads a VCF (plain text or .gz).
+    Filters:
+      1. Allowed chromosomes (1-22, X, Y)
+      2. FILTER column must be 'PASS' (Removes RefCall, LowQual, etc.)
+    Outputs:
+      Valid VCF lines to stdout with 'chr' prefixes stripped.
     """
     # 1. Write the Header required by V2P
     print("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO")
 
     try:
-        # 2. Automatically handle gzip or plain text based on extension
+        # Automatically handle gzip or plain text
         if file_path.endswith('.gz'):
             open_func = gzip.open
-            mode = 'rt' # Read Text mode
+            mode = 'rt'
         else:
             open_func = open
             mode = 'r'
@@ -29,21 +33,27 @@ def process_vcf(file_path):
                 
                 cols = line.strip().split('\t')
                 
-                # Ensure we have enough columns
-                if len(cols) < 8:
+                # Ensure we have enough columns (FILTER is index 6)
+                if len(cols) < 7:
                     continue
                 
+                # --- NEW FILTERING LOGIC ---
+                # 2. Check the FILTER column (Index 6)
+                # If it is not 'PASS', skip it. This removes 'RefCall'.
+                filter_status = cols[6]
+                if filter_status != 'PASS':
+                    continue
+                # ---------------------------
+
                 # 3. Normalize Chromosome Name
-                # Strip "chr" or "chrom" to get just the raw number/letter (e.g. '1', 'X')
                 raw_chrom = cols[0]
                 norm_chrom = raw_chrom.lower().replace('chrom', '').replace('chr', '').upper()
                 
-                # 4. Filter "Poison" Chromosomes
-                # If the variant is on chrM, chrUn, etc., skip it immediately.
+                # 4. Filter "Poison" Chromosomes (M, Un, etc.)
                 if norm_chrom not in ALLOWED_CHROMS:
                     continue
 
-                # 5. Set Output to ONLY the number/letter
+                # 5. Set Output to ONLY the number/letter (e.g. '1' not 'chr1')
                 cols[0] = norm_chrom
                 
                 # Extract first 8 fields and print
