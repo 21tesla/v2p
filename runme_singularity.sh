@@ -11,7 +11,7 @@ cd /home/logan/software/v2p
 
 bash get_predictions.sh \
   -i "pgpc4-clean.vcf" \
-  -o "output2" \
+  -o "pgpc4-output.parquet" \
   -c 8 \
   -a "$(pwd)/cadd_data/" \
   -s
